@@ -5,7 +5,7 @@
 void testApp::setup(){
     ofSetVerticalSync(true);
 
-    video.loadMovie( "GoodHair_shorter/Resources/GoodHair_shorter.mov" );
+    video.loadMovie( "GoodHair_JFleurantin/Resources/GoodHair_JFleurantin.mov" );
     sound.loadSound( "GoodHair_short.mp3" );
     
     BlurOne.allocate(ofGetWidth(), ofGetHeight());
@@ -143,7 +143,8 @@ void testApp::kinectValue(int cx, int cy){
     float positionX = ofMap(dist, closePixel.x, 1000, 0, ofGetWindowWidth());
     float positionY = ofMap(dist, closePixel.y, 500, 0, ofGetWindowHeight());
     
-    float playback = ofMap(closestValue, 0, 255, 0, 1, true);
+    float mapPlayback = closestValue - 200.0;
+    float playback = ofMap(mapPlayback, 0, 255, 0, 1, true);
     if(video.getPosition() == 1.0){
         playback = 0;
     }
