@@ -3,9 +3,17 @@
 
 //--------------------------------------------------------------
 void testApp::setup(){
+    ofSetVerticalSync(true);
+
     video.loadMovie( "GoodHair_shorter/Resources/GoodHair_shorter.mov" );
     sound.loadSound( "GoodHair_short.mp3" );
-    shader.load("shaders/pixelate");
+    
+    BlurOne.allocate(ofGetWidth(), ofGetHeight());
+    BlurTwo.allocate(ofGetWidth(), ofGetHeight());
+    
+    shader1.load("shaders/pixelate");    
+    shaderX.load("shaders/blur");
+    shaderY.load("shaders/blur2");
     
     kinect.init(false, false); // disable video image (faster fps)
     kinect.open();
@@ -21,34 +29,18 @@ void testApp::setup(){
     angle = 0;
 	kinect.setCameraTiltAngle(angle);
     
-
 }
 
 //--------------------------------------------------------------
 void testApp::update(){
     ofSoundUpdate;
     kinect.update();
+    video.update();
 
-    //I DON'T KNOW HOW TO ACHIEVE THE EFFECT I WANT
-    //MAYBE CLOSEST BLOB INSTEAD OR ALSO?
-    
-    /*
-     contourFinder
-     */
-
-    // What is the difference between distance pixels and depth pixels?
-    //both allow for 8bit and 11bit values
-   
     int currentDepthPixel = 0;
     closestValue = 50;
     farthestValue = 1000;
-    
-    //holdover value from Processing
-    
-    //I believe I need to set parameters since the three examples found do
-    //int minimumDistance = 450;
-    //int maximumDistance = 800;
-    
+
     unsigned char* depthPixels = kinect.getDepthPixels();
     
 //    int sumX = 0;    
@@ -71,47 +63,160 @@ void testApp::update(){
                 closePixel.x = x;
                 closePixel.y = y;
 
-                
         }
     
     }
+}
+    cout<<"closestX: "<<closePixel.x<<"\tclosestY: "<<closePixel.y<<"\tclosestZ: "<<closestValue<<endl;
+    
+    kinectValue(closePixel.x, closePixel.y);    
+    
+    if(upLeftQuad || lowRightQuad){
+        BlurOne.begin();
+        video.draw(0, 0, ofGetWindowWidth(), ofGetWindowHeight());
+        
+        ofSetColor(255);
+        for(int y = 0; y<ofGetWindowHeight(); y+=10)
+            for(int x=0; x<ofGetWindowWidth(); x+=10) {
+                ofRect(x, y, 5, 5);
+            }
+        
+        BlurOne.end();
     }
-    cout<<"closestX: "<<closestX<<"\tclosestY: "<<closestY<<"\tclosestZ: "<<closestValue<<endl;
     
-//    kinectValue(closestX, closestY);
-//    contourFinder.findContours(grayImage, 10, (kinect.width*kinect.height)/2, 20, false);
-    kinectValue(closePixel.x, closePixel.y);
-
-    
-    video.update();
-    
+    if(upLeftQuad || lowRightQuad){
+        int iterations = 5;
+        for (int i=0; i<iterations; i++){
+            
+            BlurTwo.begin();
+            shaderX.begin();
+            shaderX.setUniform1f("amount", closePixel.x);
+            BlurOne.draw(0, 0);
+            shaderX.end();
+            BlurTwo.end();
+            
+            BlurOne.begin();
+            shaderY.begin();
+            shaderY.setUniform1f("amount", closePixel.y);
+            BlurTwo.draw(0, 0);
+            shaderY.end();
+            BlurOne.end();
+        }
+    }
+  
 }
 
 //--------------------------------------------------------------
 void testApp::draw(){
     
-    shader.begin();
-    shader.setUniform2f("sampleDivisor", point.x, point.y);
-    shader.setUniform2f("depthPoint", closePixel.x, closePixel.y);
-//    shader.setUniform2f("depthPoint", closePixel.x, closePixel.y);
-    video.draw(0, 0, ofGetWindowWidth(), ofGetWindowHeight());
-    shader.end();
+    if(upLeftQuad || lowRightQuad){
+        
+        BlurOne.draw(0, 0, ofGetWindowWidth(), ofGetWindowHeight());
+    }
     
-    ofSetColor(20);
-    ofRect(point.x, point.y, 20, 20);
-//    ofCircle( closestX, closestY, 10 );
-    ofCircle( closePixel.x, closePixel.y, 10 );
+    if((upRightQuad || lowLeftQuad)){
+        shader1.begin();
+        shader1.setUniform2f("sampleDivisor", point.x, point.y);
+        shader1.setUniform2f("depthPoint", closePixel.x, closePixel.y);
+        video.draw(0, 0, ofGetWindowWidth(), ofGetWindowHeight());
+        shader1.end();
+    }
+    
+    if(upLeftQuad || lowRightQuad){
+        BlurTwo.draw(0, 0, ofGetWindowWidth(), ofGetWindowHeight());
+    }
+    
+//    ofSetColor(20);
+//    ofCircle( closePixel.x, closePixel.y, point.x );
 
 }
 
 //--------------------------------------------------------------
 void testApp::kinectValue(int cx, int cy){
     
-    float dist = ofDist(10, 10, cx, cy);
+    float dist = ofDist(0, 0, cx, cy);
     float max = ofDist(0, 0, ofGetWindowWidth(), ofGetWindowHeight());
     float pixelSize = ofMap(dist, 0, max, 1, 50);
     point.x = pixelSize;
     point.y = pixelSize;
+    
+    float positionX = ofMap(dist, closePixel.x, 1000, 0, ofGetWindowWidth());
+    float positionY = ofMap(dist, closePixel.y, 500, 0, ofGetWindowHeight());
+    
+    float playback = ofMap(closestValue, 0, 255, 0, 1, true);
+    if(video.getPosition() == 1.0){
+        playback = 0;
+    }
+    video.setPosition(playback);
+
+    quad1 = (positionX/2)-4;
+    quad2 = (positionX/2)+4;
+    quad3 = (positionY/2)-4;
+    quad4 = (positionY/2)+4;
+    
+    if((cx % 5 == 0) && (cx % 3 != 0)) {
+        
+        if((closePixel.x > 0 && closePixel.x < quad1) && (closePixel.y > 0 && closePixel.y < quad3)){
+            
+            upLeftQuad = true;
+            upRightQuad = false;
+            lowLeftQuad = false;
+            lowRightQuad = false;
+            
+        } else if((closePixel.x > quad2 && closePixel.x < ofGetWindowWidth()) && (closePixel.y > quad4 && closePixel.y < ofGetWindowHeight())){
+            upLeftQuad = false;
+            upRightQuad = false;
+            lowLeftQuad = false;
+            lowRightQuad = true;
+            
+        } else if((closePixel.x > 0 && closePixel.x < quad1) && (closePixel.y > quad4 && closePixel.y < ofGetWindowHeight())){
+            
+            upLeftQuad = false;
+            upRightQuad = false;
+            lowLeftQuad = true;
+            lowRightQuad = false;
+            
+        }else if((closePixel.x > quad2 && closePixel.x < ofGetWindowWidth()) && (closePixel.y > 0 && closePixel.y < quad3)){
+            
+            upLeftQuad = false;
+            upRightQuad = true;
+            lowLeftQuad = false;
+            lowRightQuad = false;
+            
+        }
+    }
+    if((cx % 3 == 0) || (cx % 5 != 0)){
+        
+        if((closePixel.x > 0 && closePixel.x < 510) && (closePixel.y > 0 && closePixel.y < 362)){
+            
+            upLeftQuad = false;
+            upRightQuad = true;
+            lowLeftQuad = false;
+            lowRightQuad = false;
+            
+        } else if((closePixel.x > quad2 && closePixel.x < ofGetWindowWidth()) && (closePixel.y > quad4 && closePixel.y < ofGetWindowHeight())){
+            upLeftQuad = false;
+            upRightQuad = false;
+            lowLeftQuad = true;
+            lowRightQuad = false;
+            
+        } else if((closePixel.x > 0 && closePixel.x < quad1) && (closePixel.y > quad4 && closePixel.y < ofGetWindowHeight())){
+            
+            upLeftQuad = false;
+            upRightQuad = false;
+            lowLeftQuad = false;
+            lowRightQuad = true;
+            
+        }else if((closePixel.x > quad2 && closePixel.x < ofGetWindowWidth()) && (closePixel.y > 0 && closePixel.y < quad3)){
+            
+            upLeftQuad = true;
+            upRightQuad = true;
+            lowLeftQuad = false;
+            lowRightQuad = false;
+            
+        }
+    }
+
 
 }
 //--------------------------------------------------------------

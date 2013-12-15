@@ -26,18 +26,29 @@ class testApp : public ofBaseApp{
     
     
     ofxKinect kinect;
-	ofxCvContourFinder contourFinder;
-    ofxCvGrayscaleImage grayImage;
+    ofShader shader1, shaderX, shaderY;
+    
+    ofFbo BlurOne, BlurTwo;
     
     ofVideoPlayer video;
     ofSoundPlayer sound;
-    ofShader shader;
+    
     ofPoint point;
     ofPoint closePixel;
+    
+    int quad1;
+    int quad2;
+    int quad3;
+    int quad4;
 
+    bool upLeftQuad;
+    bool upRightQuad;
+    bool lowLeftQuad;
+    bool lowRightQuad;
+    
     int angle;
-    int closestX;
-    int closestY;
+//    int closestX;
+//    int closestY;
     
     int closestValue;
     int farthestValue;
