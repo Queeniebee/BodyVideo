@@ -66,10 +66,10 @@ void testApp::update(){
                 closestValue = currentDepthPixel;
 
                 // and save its position (both X and Y coordinates)
-                closestX = x;
-                closestY = y;
-//                closePixel.x = x;
-//                closePixel.y = y;
+//                closestX = x;
+//                closestY = y;
+                closePixel.x = x;
+                closePixel.y = y;
 
                 
         }
@@ -78,9 +78,9 @@ void testApp::update(){
     }
     cout<<"closestX: "<<closestX<<"\tclosestY: "<<closestY<<"\tclosestZ: "<<closestValue<<endl;
     
-    kinectValue(closestX, closestY);
+//    kinectValue(closestX, closestY);
 //    contourFinder.findContours(grayImage, 10, (kinect.width*kinect.height)/2, 20, false);
-//    kinectValue(closePixel.x, closePixel.y);
+    kinectValue(closePixel.x, closePixel.y);
 
     
     video.update();
@@ -92,22 +92,22 @@ void testApp::draw(){
     
     shader.begin();
     shader.setUniform2f("sampleDivisor", point.x, point.y);
-    shader.setUniform2f("depthPoint", closestX, closestY);
+    shader.setUniform2f("depthPoint", closePixel.x, closePixel.y);
 //    shader.setUniform2f("depthPoint", closePixel.x, closePixel.y);
     video.draw(0, 0, ofGetWindowWidth(), ofGetWindowHeight());
     shader.end();
     
     ofSetColor(20);
     ofRect(point.x, point.y, 20, 20);
-    ofCircle( closestX, closestY, 10 );
-//    ofCircle( closePixel.x, closePixel.y, 10 );
+//    ofCircle( closestX, closestY, 10 );
+    ofCircle( closePixel.x, closePixel.y, 10 );
 
 }
 
 //--------------------------------------------------------------
 void testApp::kinectValue(int cx, int cy){
     
-    float dist = ofDist(kinect.getDistanceAt(cx, cy), kinect.getDistanceAt(cx, cy), cx, cy);
+    float dist = ofDist(10, 10, cx, cy);
     float max = ofDist(0, 0, ofGetWindowWidth(), ofGetWindowHeight());
     float pixelSize = ofMap(dist, 0, max, 1, 50);
     point.x = pixelSize;
