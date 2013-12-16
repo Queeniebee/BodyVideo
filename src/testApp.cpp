@@ -144,12 +144,12 @@ void testApp::kinectValue(int cx, int cy){
     float positionX = ofMap(dist, closePixel.x, 1000, 0, ofGetWindowWidth());
     float positionY = ofMap(dist, closePixel.y, 500, 0, ofGetWindowHeight());
     
-    float mapPlayback = (closestValue - 200) * 0.01;
-    float playback = ofMap(mapPlayback, 0, .55, 0, 1, true);
-//    if(video.getPosition() == 1.0){
-//        playback = 0;
-//    }
-    video.setPosition(playback);
+//    float mapPlayback = (closestValue - 200) * 0.01;
+//    float playback = ofMap(mapPlayback, 0, .55, 0, 1, true);
+////    if(video.getPosition() == 1.0){
+////        playback = 0;
+////    }
+//    video.setPosition(playback);
     
 //    int counter = 0;
 //    for (counter; counter < 5; counter++) {
@@ -158,7 +158,7 @@ void testApp::kinectValue(int cx, int cy){
 //    } (mapPlayback) {
 //        <#statements#>
 //    }
-    cout<<"playhead\t"<<mapPlayback<<endl;
+//    cout<<"playhead\t"<<mapPlayback<<endl;
 
     quad1 = (positionX/2)-4;
     quad2 = (positionX/2)+4;
