@@ -5,17 +5,12 @@
 void testApp::setup(){
     ofSetVerticalSync(true);
 
-    video.loadMovie( "GoodHair_JFleurantin/Resources/GoodHair_JFleurantin.mov" );
-    sound.loadSound( "GoodHair_short.mp3" );
-    
-//    BlurOne.allocate(ofGetWidth(), ofGetHeight());
-//    BlurTwo.allocate(ofGetWidth(), ofGetHeight());
+    video.loadMovie( "MOVIE.mov" );
+    sound.loadSound( "SOUND.mp3" );
     
     shader1.load("shaders/pixelate");    
-//    shaderX.load("shaders/blur");
-//    shaderY.load("shaders/blur2");
-    
-    kinect.init(false, false); // disable video image (faster fps)
+
+    kinect.init(false, false); 
     kinect.open();
     
     sound.play();
@@ -28,7 +23,7 @@ void testApp::setup(){
     point.set(20, 20);
 
     angle = 0;
-	kinect.setCameraTiltAngle(angle);
+    kinect.setCameraTiltAngle(angle);
     
 }
 
@@ -44,23 +39,13 @@ void testApp::update(){
 
     unsigned char* depthPixels = kinect.getDepthPixels();
     
-//    int sumX = 0;    
-//    int sumY = 0;
-//    int counter = 0;
-
-    //I don't know if the bounds should be the Kinect, Video, or App Window
     for(int x = 0; x < kinect.getWidth(); x++){
         for(int y = 0; y < kinect.getHeight(); y++){
             int i = x + y * kinect.getWidth();
             int currentDepthPixel = depthPixels[i];
-            // int currentDepthPixel = depthPixels[x + y * ofGetWindowWidth()]
             if(currentDepthPixel > closestValue && currentDepthPixel < farthestValue){
-                // save its value
                 closestValue = currentDepthPixel;
 
-                // and save its position (both X and Y coordinates)
-//                closestX = x;
-//                closestY = y;
                 closePixel.x = x;
                 closePixel.y = y;
 
@@ -68,67 +53,17 @@ void testApp::update(){
     
     }
 }
-    cout<<"closestX: "<<closePixel.x<<"\tclosestY: "<<closePixel.y<<"\tclosestZ: "<<closestValue<<endl;
-    
-    kinectValue(closePixel.x, closePixel.y);    
-    
-//    if(upLeftQuad || lowRightQuad){
-//        BlurOne.begin();
-//        video.draw(0, 0, ofGetWindowWidth(), ofGetWindowHeight());
-//        
-//        ofSetColor(255);
-//        for(int y = 0; y<ofGetWindowHeight(); y+=10)
-//            for(int x=0; x<ofGetWindowWidth(); x+=10) {
-//                ofRect(x, y, 5, 5);
-//            }
-//        
-//        BlurOne.end();
-//    }
-    
-//    if(upLeftQuad || lowRightQuad){
-//        int iterations = 5;
-//        for (int i=0; i<iterations; i++){
-//            
-//            BlurTwo.begin();
-//            shaderX.begin();
-//            shaderX.setUniform1f("amount", point.x);
-//            BlurOne.draw(0, 0);
-//            shaderX.end();
-//            BlurTwo.end();
-//            
-//            BlurOne.begin();
-//            shaderY.begin();
-//            shaderY.setUniform1f("amount", point.y);
-//            BlurTwo.draw(0, 0);
-//            shaderY.end();
-//            BlurOne.end();
-//        }
-//    }
-  
+    kinectValue(closePixel.x, closePixel.y);
 }
 
 //--------------------------------------------------------------
 void testApp::draw(){
-    
-//    if(upLeftQuad || lowRightQuad){
-//        
-//        BlurOne.draw(0, 0, ofGetWindowWidth(), ofGetWindowHeight());
-//    }
-//    
-//    if((upRightQuad || lowLeftQuad)){
+
         shader1.begin();
         shader1.setUniform2f("sampleDivisor", point.x, point.y);
         shader1.setUniform2f("depthPoint", closePixel.x, closePixel.y);
         video.draw(0, 0, ofGetWindowWidth(), ofGetWindowHeight());
         shader1.end();
-//    }
-//    
-//    if(upLeftQuad || lowRightQuad){
-//        BlurTwo.draw(0, 0, ofGetWindowWidth(), ofGetWindowHeight());
-//    }
-    
-//    ofSetColor(20);
-//    ofCircle( closePixel.x, closePixel.y, point.x );
 
 }
 
@@ -143,23 +78,32 @@ void testApp::kinectValue(int cx, int cy){
     
     float positionX = ofMap(dist, closePixel.x, 1000, 0, ofGetWindowWidth());
     float positionY = ofMap(dist, closePixel.y, 500, 0, ofGetWindowHeight());
-    
+/*    
+
 //    float mapPlayback = (closestValue - 200) * 0.01;
 //    float playback = ofMap(mapPlayback, 0, .55, 0, 1, true);
 //    if(video.getPosition() == 1.0){
 //        playback = 0;
 //    }
 //    video.setPosition(playback);
-    
-//    int counter = 0;
-//    for (counter; counter < 5; counter++) {
-//        int playheadAvg += mapPlayback;
-//
-//    } (mapPlayback) {
-//        <#statements#>
-//    }
-//    cout<<"playhead\t"<<mapPlayback<<endl;
 
+
+*/    
+/*   
+     Mapping playback position
+     
+    float mapPlayback = (closestValue - 200) * 0.01;
+    float playback = ofMap(mapPlayback, 0, .55, 0, 1, true);
+    if(video.getPosition() == 1.0){
+        playback = 0;
+   }
+   video.setPosition(playback);
+   
+   */
+
+/*
+    If swapping between shaders
+    
     quad1 = (positionX/2)-4;
     quad2 = (positionX/2)+4;
     quad3 = (positionY/2)-4;
@@ -227,12 +171,12 @@ void testApp::kinectValue(int cx, int cy){
             
         }
     }
-
+*/
 
 }
 //--------------------------------------------------------------
 void testApp::exit() {
-	kinect.setCameraTiltAngle(0); // zero the tilt on exit
+	kinect.setCameraTiltAngle(0);
 	kinect.close();
 }
 
