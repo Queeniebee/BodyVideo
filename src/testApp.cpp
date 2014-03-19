@@ -146,9 +146,9 @@ void testApp::kinectValue(int cx, int cy){
     
 //    float mapPlayback = (closestValue - 200) * 0.01;
 //    float playback = ofMap(mapPlayback, 0, .55, 0, 1, true);
-////    if(video.getPosition() == 1.0){
-////        playback = 0;
-////    }
+//    if(video.getPosition() == 1.0){
+//        playback = 0;
+//    }
 //    video.setPosition(playback);
     
 //    int counter = 0;
